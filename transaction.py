@@ -7,26 +7,64 @@ class Tx:
     required_sigs = None
 
     def __init__(self):
-        inputs = []
-        outputs = []
-        sigs = []
-        required_sigs = []
+        self.inputs = []
+        self.outputs = []
+        self.sigs = []
+        self.required_sigs = []
 
     def add_input(self, from_addr, amount):
-        pass
+        self.inputs.append((from_addr, amount))
 
     def add_output(self, to_addr, amount):
-        pass
+        self.outputs.append((to_addr, amount))
 
     def add_required(self, addr):
-        pass
+        self.required_sigs.append(addr)
 
     def sign(self, private_key):
-        pass
+        message = self.__gather()
+        new_sig = signatures.sign(message, private_key)
+        self.sigs.append(new_sig)
 
+    #for each address look for each signature to be found
     def is_valid(self):
-        return False
+        total_in = 0
+        total_out = 0
+        message = self.__gather()
+        for addr, amount in self.inputs:
+            #print(addr)
+            #print(amount)
+            found = False
+            for s in self.sigs:
+                if signatures.verify(message, s, addr):
+                    found = True
+            if not found:
+                return False
+            if amount < 0:
+                return False
+            total_in = total_in + amount
+        for addr in self.required_sigs:
+            found = False
+            for s in self.sigs:
+                if signatures.verify(message, s, addr):
+                    found = True
+            if not found:
+                return False
+        for addr, amount in self.outputs:
+            if amount < 0:
+                return False
+            total_out = total_out + amount
+        if total_out > total_in:
+            return False
+        return True
 
+    #creating the message
+    def __gather(self):
+        data = []
+        data.append(self.inputs)
+        data.append(self.outputs)
+        data.append(self.required_sigs)
+        return data
 
 if __name__ == "__main__":
     pr1, pu1 = signatures.generate_keys()
@@ -52,7 +90,7 @@ if __name__ == "__main__":
     Tx3 = Tx()
     Tx3.add_input(pu3, 1.2)
     Tx3.add_output(pu1, 1.1)
-    Tx3.add_reqd(pu4)
+    Tx3.add_required(pu4)
     Tx3.sign(pr3)
     Tx3.sign(pr4)
 
@@ -72,7 +110,7 @@ if __name__ == "__main__":
     Tx5 = Tx()
     Tx5.add_input(pu3, 1.2)
     Tx5.add_output(pu1, 1.1)
-    Tx5.add_reqd(pu4)
+    Tx5.add_required(pu4)
     Tx5.sign(pr3)
 
     # Two input addrs, signed by one
