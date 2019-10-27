@@ -66,6 +66,23 @@ class Tx:
         data.append(self.required_sigs)
         return data
 
+    def __repr__(self):
+        repr_str = 'INPUTS:/n'
+        for addr, amt in self.inputs:
+            repr_str = repr_str + str(amt) + ' from ' + str(addr) + '/n'
+        repr_str = repr_str + 'OUTPUTS:/n'
+        for addr, amt in self.outputs:
+            repr_str = repr_str + str(amt) + ' to ' + str(addr) + '/n'
+        repr_str = repr_str + 'REQUIRED:/n'
+        for r in self.required_sigs:
+            repr_str = repr_str + str(r) + '/n'
+        repr_str = repr_str + 'SIGS:/n'
+        for s in self.sigs:
+            repr_str = repr_str + str(s) + '/n'
+        repr_str = repr_str + 'END/n'
+        return repr_str
+
+#testing
 if __name__ == "__main__":
     pr1, pu1 = signatures.generate_keys()
     pr2, pu2 = signatures.generate_keys()
