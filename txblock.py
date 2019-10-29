@@ -20,7 +20,7 @@ class TxBlock (Block):
     def add_tx(self, tx_in):
         self.data.append(tx_in)
 
-    def __count_totals(self):
+    def count_totals(self):
         total_in = 0
         total_out = 0
         for tx in self.data:
@@ -38,7 +38,7 @@ class TxBlock (Block):
         for tx in self.data:
             if not tx.is_valid():
                 return False
-        total_in, total_out = self.__count_totals()
+        total_in, total_out = self.count_totals()
         if total_out - total_in - reward > 0.0000000001:
             return False
         return True
