@@ -2,6 +2,7 @@ import socketutils
 import transaction
 import txblock
 import pickle
+import wallet
 
 wallet_list = [('localhost',5006)]
 tx_list = []
@@ -15,7 +16,13 @@ def stop_all():
 def miner_server(my_addr):
     global tx_list
     global break_now
-    global head_blocks
+    #global head_blocks
+    try:
+        tx_list = load_tx_list('txs.dat')
+        print('loaded tx_list has ' + str(len(tx_list)) + ' txs')
+    except:
+        print('no previous txs. starting fresh')
+        tx_list = []
     head_blocks = [None]
     my_ip, my_port = my_addr
     server = socketutils.new_server_connection(my_ip, my_port)
@@ -25,7 +32,8 @@ def miner_server(my_addr):
         if isinstance(new_tx, transaction.Tx):
             tx_list.append(new_tx)
             print('received tx')
-
+    print('saving ' + str(len(tx_list)) + " txs to txs.dat")
+    save_tx_list(tx_list, 'txs.dat')
     return False
 
 def nonce_finder(wallet_list, miner_public):
@@ -61,6 +69,7 @@ def nonce_finder(wallet_list, miner_public):
             for tx in NewBlock.data:
                 if tx != mine_reward:
                     tx_list.remove(tx)
+    txblock.save_blocks(head_blocks, 'all_blocks.dat')
     return True
 
 def load_tx_list(filename):
@@ -82,7 +91,7 @@ if __name__ == '__main__':
     import time
 
     my_pr, my_pu = signatures.generate_keys()
-    t1 = threading.Thread(target = miner_server, args = (('localhost', 5005),))
+    t1 = threading.Thread(target=miner_server, args=(('localhost', 5005),))
     t2 = threading.Thread(target=nonce_finder, args=(wallet_list, my_pu))
 
     server = socketutils.new_server_connection('localhost', 5006)
@@ -143,11 +152,13 @@ if __name__ == '__main__':
             pass
 
     time.sleep(20)
-    stop_all()
+    break_now = True
     time.sleep(2)
-    server.close()
 
     t1.join()
     t2.join()
 
+    server.close()
+
     print('done!')
+

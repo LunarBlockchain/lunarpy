@@ -83,7 +83,7 @@ def load_public(filename):
     pu_key = fin.read()
     fin.close()
     return pu_key
-def loadKeys(pr_file, pu_file):
+def load_keys(pr_file, pu_file):
     return load_private(pr_file), load_public(pu_file)
 
 

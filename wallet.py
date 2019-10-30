@@ -13,7 +13,11 @@ def stop_all():
     break_now = True
 def wallet_server(my_addr):
     global head_blocks
-    head_blocks = [None]
+    try:
+        head_blocks = txblock.load_blocks('wallet_blocks.dat')
+    except:
+        print('WS: no previous blocks found. starting fresh.')
+        head_blocks = [None]
     server = socketutils.new_server_connection('localhost', 5006)
     while not break_now:
         new_block = socketutils.rcv_obj(server)
@@ -37,6 +41,7 @@ def wallet_server(my_addr):
                         head_blocks.remove(b)
                         head_blocks.append(new_block)
                         print('added to head blocks')
+    txblock.save_blocks(head_blocks, 'wallet_blocks.dat')
     server.close()
     return True
 
@@ -65,18 +70,6 @@ def send_coins(pu_send, amt_send, pr_send, pu_recv, amt_recv, miner_list):
 def load_keys(pr_file, pu_file):
     return signatures.load_private(pr_file), signatures.load_public(pu_file)
 
-def save_blocks(block_list, filename):
-    fp = open(filename, 'wb')
-    pickle.dump(block_list, fp)
-    fp.close()
-    return True
-
-def load_blocks(filename):
-    fin = open(filename, 'rb')
-    ret = pickle.load(fin)
-    fin.close()
-    return ret
-
 if __name__ == '__main__':
 
     import threading
@@ -104,14 +97,34 @@ if __name__ == '__main__':
     bal_3 = get_balance(pu3)
 
     #send coins
-    send_coins(pu1, 1.0, pr1, pu2, 1.0, miner_list)
-    send_coins(pu1, 1.0, pr1, pu3, 0.3, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+    send_coins(pu1, 0.1, pr1, pu2, 0.1, miner_list)
+
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+    send_coins(pu1, 0.1, pr1, pu3, 0.03, miner_list)
+
 
     time.sleep(30)
 
     #save and load all blocks
-    save_blocks(head_blocks, 'all_blocks.dat')
-    head_blocks = load_blocks('all_blocks.dat')
+    txblock.save_blocks(head_blocks, 'all_blocks.dat')
+    head_blocks = txblock.load_blocks('all_blocks.dat')
     #query balances
     new_1 = get_balance(pu1)
     print('new balance1: ' + str(new_1))

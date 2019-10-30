@@ -10,7 +10,7 @@ import random
 reward = 25.0
 leading_zeros = 2
 next_char_limit = 255
-head_blocks = [None]
+#head_blocks = [None]
 
 class TxBlock (Block):
     global head_blocks
@@ -78,6 +78,18 @@ def find_longest_chain(head_blocks):
             long_head = b
             longest = this_len
     return long_head
+
+def save_blocks(block_list, filename):
+    fp = open(filename, 'wb')
+    pickle.dump(block_list, fp)
+    fp.close()
+    return True
+
+def load_blocks(filename):
+    fin = open(filename, 'rb')
+    ret = pickle.load(fin)
+    fin.close()
+    return ret
 
 #testing
 if __name__ == '__main__':
@@ -215,3 +227,26 @@ if __name__ == '__main__':
         print('success. greed detected')
     else:
         print('error. greed not detected')
+
+    B6 = TxBlock(B4)
+    this_pu = pu4
+    this_pr = pr4
+    for i in range(30):
+        new_tx = Tx()
+        new_pr, new_pu = generate_keys()
+        new_tx.add_input(this_pu, 0.3)
+        new_tx.add_output(new_pu,0.3)
+        new_tx.sign(this_pr)
+        B6.add_tx(new_tx)
+        this_pu, this_pr = new_pu, new_pr
+        save_previous = B6.previous_block
+        B6.previous_block = None
+        this_size = len(pickle.dumps(B6))
+        print('size = ' + str(this_size))
+        B6.previous_block = save_previous
+        if B6.is_valid() and this_size > 10000:
+            print('error. big blocks are valid. size = ' + str(this_size))
+        elif not B6.is_valid() and this_size <= 10000:
+            print('error. small blocks are invalid. size = ' + str(this_size))
+        else:
+            print('block size check passed')
