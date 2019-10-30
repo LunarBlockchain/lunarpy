@@ -54,7 +54,7 @@ def verify(message, sig, pu_ser):
     except:
         print("Error executing public_key.verify")
         return False
-def savePrivate(pr_key, filename):
+def save_private(pr_key, filename):
     pem = pr_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
@@ -64,7 +64,7 @@ def savePrivate(pr_key, filename):
     fp.write(pem)
     fp.close()
     return 
-def loadPrivate(filename):
+def load_private(filename):
     fin = open(filename, "rb")
     pr_key = serialization.load_pem_private_key(
         fin.read(),
@@ -73,18 +73,18 @@ def loadPrivate(filename):
     )
     fin.close()
     return pr_key
-def savePublic(pu_key, filename):
+def save_public(pu_key, filename):
     fp = open(filename, "wb")
     fp.write(pu_key)
     fp.close()
     return True
-def loadPublic(filename):
+def load_public(filename):
     fin = open(filename, "rb")
     pu_key = fin.read()
     fin.close()
     return pu_key
 def loadKeys(pr_file, pu_file):
-    return loadPrivate(pr_file), loadPublic(pu_file)
+    return load_private(pr_file), load_public(pu_file)
 
 
 if __name__ == '__main__':
@@ -119,8 +119,8 @@ if __name__ == '__main__':
     else:
         print("Success! Tampering detected")
 
-    savePrivate(pr2, "private.key")
-    pr_load = loadPrivate("private.key")
+    save_private(pr2, "private.key")
+    pr_load = load_private("private.key")
     sig3 = sign(message, pr_load)
     correct = verify(message, sig3, pu2)
     if correct:
@@ -128,8 +128,8 @@ if __name__ == '__main__':
     else:
         print ("ERROR! Load private key is bad")
 
-    savePublic(pu2, "public.key")
-    pu_load = loadPublic("public.key")
+    save_public(pu2, "public.key")
+    pu_load = load_public("public.key")
 
     correct = verify(message, sig3, pu_load)
     if correct:

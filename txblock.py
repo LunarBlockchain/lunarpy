@@ -9,9 +9,13 @@ import random
 
 reward = 25.0
 leading_zeros = 2
-next_char_limit = 50
+next_char_limit = 255
+head_blocks = [None]
 
 class TxBlock (Block):
+    global head_blocks
+    head_blocks = [None]
+
     nonce = 'AAAAAA'
 
     def __init__(self, previous_block):
@@ -53,13 +57,27 @@ class TxBlock (Block):
         if this_hash[:leading_zeros] != bytes(''.join([ '\x4f' for i in range(leading_zeros)]),'utf8'):
             return False
         return int(this_hash[leading_zeros]) < next_char_limit
-    def find_nonce(self):
-        for i in range(1000000):
+    def find_nonce(self, n_tries=1000000):
+        for i in range(n_tries):
             self.nonce = ''.join([
                 chr(random.randint(0, 255)) for i in range(10*leading_zeros)])
             if self.good_nonce():
                 return self.nonce
         return None
+
+def find_longest_chain(head_blocks):
+    longest = -1
+    long_head = None
+    for b in head_blocks:
+        current = b
+        this_len = 0
+        while current != None:
+            this_len = this_len + 1
+            current = current.previous_block
+        if this_len > longest:
+            long_head = b
+            longest = this_len
+    return long_head
 
 #testing
 if __name__ == '__main__':
